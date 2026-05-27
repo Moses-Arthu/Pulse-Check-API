@@ -1,0 +1,332 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Pulse-Check API – Watchdog Sentinel",
+    "version": "1.0.0",
+    "description": "Dead Man's Switch API for CritMon Servers Inc. Monitors remote devices and triggers alerts when heartbeats are missed.",
+    "contact": {
+      "name": "CritMon Dev Team",
+      "email": "dev@critmon.com"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local Development Server"
+    }
+  ],
+  "tags": [
+    { "name": "Monitors", "description": "Device monitor lifecycle management" },
+    { "name": "Health",   "description": "Server health check" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check",
+        "description": "Returns the server status and a summary of all monitors.",
+        "responses": {
+          "200": {
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "ok",
+                  "timestamp": "2026-05-27T10:00:00.000Z",
+                  "uptime": 120.45,
+                  "monitors": { "total": 3, "active": 2, "paused": 1, "down": 0 }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monitors": {
+      "post": {
+        "tags": ["Monitors"],
+        "summary": "Register a new monitor",
+        "description": "Creates a new device monitor and immediately starts the countdown timer.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterMonitorRequest" },
+              "example": {
+                "id": "device-123",
+                "timeout": 60,
+                "alert_email": "admin@critmon.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Monitor created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Monitor created successfully",
+                  "id": "device-123"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "\"timeout\" must be at least 5 seconds"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Monitor ID already exists",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Monitor with id 'device-123' already exists"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Monitors"],
+        "summary": "Dashboard – list all monitors",
+        "description": "Returns all registered monitors with live remaining-time values. Used by support engineers for real-time visibility.",
+        "responses": {
+          "200": {
+            "description": "List of all monitors",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "count": 2,
+                  "monitors": [
+                    {
+                      "id": "device-123",
+                      "status": "active",
+                      "timeout": 60,
+                      "remainingTime": 45,
+                      "alertEmail": "admin@critmon.com",
+                      "lastHeartbeat": "2026-05-27T10:00:00.000Z",
+                      "createdAt": "2026-05-27T09:59:00.000Z"
+                    },
+                    {
+                      "id": "solar-farm-7",
+                      "status": "paused",
+                      "timeout": 120,
+                      "remainingTime": 87,
+                      "alertEmail": "ops@critmon.com",
+                      "lastHeartbeat": null,
+                      "createdAt": "2026-05-27T09:58:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monitors/{id}": {
+      "get": {
+        "tags": ["Monitors"],
+        "summary": "Get a single monitor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "device-123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monitor found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "monitor": {
+                    "id": "device-123",
+                    "status": "active",
+                    "timeout": 60,
+                    "remainingTime": 42,
+                    "alertEmail": "admin@critmon.com",
+                    "lastHeartbeat": "2026-05-27T10:00:00.000Z",
+                    "createdAt": "2026-05-27T09:59:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Monitor not found",
+            "content": {
+              "application/json": {
+                "example": { "success": false, "message": "Monitor not found: device-123" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Monitors"],
+        "summary": "Delete a monitor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monitor deleted",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Monitor 'device-123' deleted successfully"
+                }
+              }
+            }
+          },
+          "404": { "description": "Monitor not found" }
+        }
+      }
+    },
+    "/monitors/{id}/heartbeat": {
+      "post": {
+        "tags": ["Monitors"],
+        "summary": "Send a heartbeat",
+        "description": "Resets the countdown timer for the specified monitor. If the monitor was paused, it automatically resumes.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "device-123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Heartbeat accepted – timer reset",
+            "content": {
+              "application/json": {
+                "example": { "success": true, "message": "Heartbeat received" }
+              }
+            }
+          },
+          "404": {
+            "description": "Monitor not found",
+            "content": {
+              "application/json": {
+                "example": { "success": false, "message": "Monitor not found: device-123" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/monitors/{id}/pause": {
+      "post": {
+        "tags": ["Monitors"],
+        "summary": "Pause monitoring",
+        "description": "Stops the countdown timer. No alerts will fire while paused. Send a heartbeat to resume.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "device-123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monitor paused",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Monitor 'device-123' has been paused",
+                  "monitor": {
+                    "id": "device-123",
+                    "status": "paused",
+                    "timeout": 60,
+                    "remainingTime": 38,
+                    "alertEmail": "admin@critmon.com",
+                    "lastHeartbeat": null,
+                    "createdAt": "2026-05-27T09:59:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Monitor not found" },
+          "409": { "description": "Monitor already paused or is down" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegisterMonitorRequest": {
+        "type": "object",
+        "required": ["id", "timeout", "alert_email"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "device-123"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 5,
+            "example": 60
+          },
+          "alert_email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@critmon.com"
+          }
+        }
+      },
+      "Monitor": {
+        "type": "object",
+        "properties": {
+          "id":            { "type": "string", "example": "device-123" },
+          "status":        { "type": "string", "enum": ["active", "paused", "down"] },
+          "timeout":       { "type": "integer", "example": 60 },
+          "remainingTime": { "type": "integer", "example": 45 },
+          "alertEmail":    { "type": "string", "example": "admin@critmon.com" },
+          "lastHeartbeat": { "type": "string", "format": "date-time", "nullable": true },
+          "createdAt":     { "type": "string", "format": "date-time" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Monitor not found" }
+        }
+      }
+    }
+  }
+}
