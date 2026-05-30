@@ -1,4 +1,4 @@
-# 🛰️ Pulse-Check API — Watchdog Sentinel
+# Pulse-Check API — Watchdog Sentinel
 
 > **Production-grade Dead Man's Switch API for CritMon Servers Inc.**
 >
@@ -6,25 +6,25 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-1. [Project Overview](#-project-overview)
-2. [Features](#-features)
-3. [Architecture Diagram](#-architecture-diagram)
-4. [State Flow Diagram](#-state-flow-diagram)
-5. [Setup & Installation](#-setup--installation)
-6. [Environment Variables](#-environment-variables)
-7. [Running the Server](#-running-the-server)
-8. [API Documentation](#-api-documentation)
-9. [Example Requests & Responses](#-example-requests--responses)
-10. [Developer's Choice Feature](#-developers-choice-feature)
-11. [Testing](#-testing)
-12. [Project Structure](#-project-structure)
-13. [Future Improvements](#-future-improvements)
+1. [Project Overview](#project-overview)
+2. [Features](#features)
+3. [Architecture Diagram](#architecture-diagram)
+4. [State Flow Diagram](#state-flow-diagram)
+5. [Setup & Installation](#setup--installation)
+6. [Environment Variables](#environment-variables)
+7. [Running the Server](#running-the-server)
+8. [API Documentation](#api-documentation)
+9. [Example Requests & Responses](#example-requests--responses)
+10. [Developer's Choice Feature](#developers-choice-feature)
+11. [Testing](#testing)
+12. [Project Structure](#project-structure)
+13. [Future Improvements](#future-improvements)
 
 ---
 
-## 🔍 Project Overview
+## Project Overview
 
 CritMon Servers Inc. monitors remote infrastructure — solar farms, weather stations — in areas with poor connectivity. Devices are expected to send periodic **"I'm alive"** heartbeats.
 
@@ -40,13 +40,13 @@ CritMon Servers Inc. monitors remote infrastructure — solar farms, weather sta
 
 ---
 
-## ✨ Features
+## Features
 
 | Feature | Description |
 |---|---|
 | **Monitor Registration** | Register any device with a custom timeout duration |
 | **Heartbeat Reset** | Reset the countdown with a single HTTP request |
-| **Automatic Alert** | FireS a console & email alert when a device goes silent |
+| **Automatic Alert** | Fires a console & email alert when a device goes silent |
 | **Pause / Maintenance Mode** | Freeze the countdown during planned downtime |
 | **Auto-Resume on Heartbeat** | A heartbeat un-pauses a monitor automatically |
 | **Monitoring Dashboard** | `GET /monitors` — live view of all device states |
@@ -60,7 +60,7 @@ CritMon Servers Inc. monitors remote infrastructure — solar farms, weather sta
 
 ---
 
-## 🏗️ Architecture Diagram
+## Architecture Diagram
 
 The sequence below shows the full lifecycle of a monitored device — from registration through heartbeats to an alert.
 
@@ -89,12 +89,12 @@ sequenceDiagram
     TimerManager->>AlertService: emit("alert", { id, alertEmail, payload })
     AlertService->>Logger: logger.error("[ALERT] Device down!")
     AlertService-->>Device: Send email to alert_email
-    Note over TimerManager: status → "down"
+    Note over TimerManager: status becomes "down"
 ```
 
 ---
 
-## 🔄 State Flow Diagram
+## State Flow Diagram
 
 A monitor can exist in exactly one of three states:
 
@@ -117,7 +117,7 @@ stateDiagram-v2
 
 ---
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 
@@ -128,8 +128,8 @@ stateDiagram-v2
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/pulse-check-api.git
-cd pulse-check-api
+git clone https://github.com/Moses-Arthu/Pulse-Check-API.git
+cd Pulse-Check-API
 
 # 2. Install dependencies
 npm install
@@ -140,7 +140,7 @@ cp .env.example .env
 
 ---
 
-## 🔐 Environment Variables
+## Environment Variables
 
 Edit `.env` before starting the server:
 
@@ -160,7 +160,7 @@ Edit `.env` before starting the server:
 
 ---
 
-## 🚀 Running the Server
+## Running the Server
 
 ```bash
 # Production
@@ -173,14 +173,14 @@ npm run dev
 Server output:
 
 ```
-🚀 Pulse-Check API (Watchdog Sentinel) running on port 3000
-📖 Swagger docs available at http://localhost:3000/api-docs
-❤️  Health check: http://localhost:3000/health
+Pulse-Check API (Watchdog Sentinel) running on port 3000
+Swagger docs available at http://localhost:3000/api-docs
+Health check: http://localhost:3000/health
 ```
 
 ---
 
-## 📖 API Documentation
+## API Documentation
 
 Interactive Swagger UI is available at **`http://localhost:3000/api-docs`** when the server is running.
 
@@ -209,7 +209,7 @@ Interactive Swagger UI is available at **`http://localhost:3000/api-docs`** when
 
 ---
 
-## 💡 Example Requests & Responses
+## Example Requests & Responses
 
 ### Register a Monitor
 
@@ -321,7 +321,7 @@ curl -X POST http://localhost:3000/monitors \
 
 ---
 
-## 🧠 Developer's Choice Feature
+## Developer's Choice Feature
 
 ### Email Alerts via Nodemailer
 
@@ -352,7 +352,7 @@ EMAIL_FROM="Watchdog Sentinel <alerts@critmon.com>"
 **Email preview:**
 
 ```
-Subject: 🚨 ALERT: Device device-123 is DOWN!
+Subject: ALERT: Device device-123 is DOWN!
 
 Watchdog Sentinel detected a missed heartbeat.
 
@@ -367,7 +367,7 @@ Please deploy a repair team immediately.
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -381,74 +381,74 @@ npm run test:watch
 
 Tests are located in `tests/monitor.test.js` and cover:
 
-| Scenario | Test |
+| Scenario | Status |
 |---|---|
-| Register monitor | ✅ Success, duplicate ID, missing fields, invalid email, timeout < 5 |
-| Heartbeat | ✅ Resets timer, updates lastHeartbeat, 404 on unknown |
-| Pause | ✅ Pauses active, 409 on already-paused, 404 on unknown |
-| Auto-resume | ✅ Heartbeat un-pauses a paused monitor |
-| Timeout alert | ✅ Status becomes `down` after expiry (fake timers) |
-| Dashboard | ✅ Returns all monitors with correct fields and count |
-| Single monitor | ✅ Returns correct record, 404 on unknown |
-| Delete | ✅ Removes monitor, 404 on subsequent get, 404 on unknown |
-| Unknown routes | ✅ Returns 404 with `success: false` |
-| Health check | ✅ Returns `status: ok` with uptime and monitor stats |
+| Register monitor — success, duplicate ID, missing fields, invalid email, timeout below minimum | Passing |
+| Heartbeat — resets timer, updates lastHeartbeat, 404 on unknown | Passing |
+| Pause — pauses active monitor, 409 on already-paused, 404 on unknown | Passing |
+| Auto-resume — heartbeat un-pauses a paused monitor | Passing |
+| Timeout alert — status becomes `down` after expiry (fake timers) | Passing |
+| Dashboard — returns all monitors with correct fields and count | Passing |
+| Single monitor — returns correct record, 404 on unknown | Passing |
+| Delete — removes monitor, 404 on subsequent get, 404 on unknown | Passing |
+| Unknown routes — returns 404 with `success: false` | Passing |
+| Health check — returns `status: ok` with uptime and monitor stats | Passing |
 
-**Target: 80%+ line coverage**
+**Target: 80%+ line coverage — Achieved: 88.5%**
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 pulse-check-api/
-│
-├── src/
-│   ├── config/
-│   │   ├── config.js          # Centralised environment config
-│   │   └── logger.js          # Winston logger (console + file)
-│   │
-│   ├── controllers/
-│   │   └── monitor.controller.js  # HTTP handler layer
-│   │
-│   ├── middlewares/
-│   │   ├── errorHandler.js    # Centralized error formatter
-│   │   ├── notFoundHandler.js # 404 catch-all
-│   │   └── requestLogger.js   # HTTP request logger
-│   │
-│   ├── routes/
-│   │   ├── monitor.routes.js  # /monitors endpoints
-│   │   └── health.routes.js   # /health endpoint
-│   │
-│   ├── services/
-│   │   ├── TimerManager.js    # Core countdown engine (singleton)
-│   │   └── AlertService.js    # Alert dispatcher (email + log)
-│   │
-│   ├── validators/
-│   │   └── monitor.validator.js  # Joi schemas
-│   │
-│   └── app.js                 # Express app wiring
-│
-├── docs/
-│   └── swagger.json           # OpenAPI 3.0 specification
-│
-├── tests/
-│   └── monitor.test.js        # Jest + Supertest integration tests
-│
-├── logs/                      # Auto-created at runtime
-│   ├── combined.log
-│   └── error.log
-│
-├── .env.example               # Environment variable template
-├── .gitignore
-├── server.js                  # Entry point
-├── package.json
-└── README.md
+|
++-- src/
+|   +-- config/
+|   |   +-- config.js          # Centralised environment config
+|   |   +-- logger.js          # Winston logger (console + file)
+|   |
+|   +-- controllers/
+|   |   +-- monitor.controller.js  # HTTP handler layer
+|   |
+|   +-- middlewares/
+|   |   +-- errorHandler.js    # Centralized error formatter
+|   |   +-- notFoundHandler.js # 404 catch-all
+|   |   +-- requestLogger.js   # HTTP request logger
+|   |
+|   +-- routes/
+|   |   +-- monitor.routes.js  # /monitors endpoints
+|   |   +-- health.routes.js   # /health endpoint
+|   |
+|   +-- services/
+|   |   +-- TimerManager.js    # Core countdown engine (singleton)
+|   |   +-- AlertService.js    # Alert dispatcher (email + log)
+|   |
+|   +-- validators/
+|   |   +-- monitor.validator.js  # Joi schemas
+|   |
+|   +-- app.js                 # Express app wiring
+|
++-- docs/
+|   +-- swagger.json           # OpenAPI 3.0 specification
+|
++-- tests/
+|   +-- monitor.test.js        # Jest + Supertest integration tests
+|
++-- logs/                      # Auto-created at runtime
+|   +-- combined.log
+|   +-- error.log
+|
++-- .env.example               # Environment variable template
++-- .gitignore
++-- server.js                  # Entry point
++-- package.json
++-- README.md
 ```
 
 ---
 
-## 🔮 Future Improvements
+## Future Improvements
 
 | Improvement | Rationale |
 |---|---|
@@ -465,4 +465,4 @@ pulse-check-api/
 
 ---
 
-> Built with ❤️ for CritMon Servers Inc. — *"We watch, so you don't have to."*
+Built with care for CritMon Servers Inc. — "We watch, so you don't have to."
