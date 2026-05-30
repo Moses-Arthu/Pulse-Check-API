@@ -7,9 +7,9 @@ const logger = require('./src/config/logger');
 const PORT = process.env.PORT || 3000;
 
 const server = app.listen(PORT, () => {
-  logger.info(`🚀 Pulse-Check API (Watchdog Sentinel) running on port ${PORT}`);
-  logger.info(`📖 Swagger docs available at http://localhost:${PORT}/api-docs`);
-  logger.info(`❤️  Health check: http://localhost:${PORT}/health`);
+  logger.info(`Pulse-Check API (Watchdog Sentinel) running on port ${PORT}`);
+  logger.info(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+  logger.info(`Health check: http://localhost:${PORT}/health`);
 });
 
 // Graceful shutdown

@@ -162,6 +162,8 @@ Edit `.env` before starting the server:
 
 ## Running the Server
 
+### Using Command Line
+
 ```bash
 # Production
 npm start
@@ -178,7 +180,16 @@ Swagger docs available at http://localhost:3000/api-docs
 Health check: http://localhost:3000/health
 ```
 
+### Using Visual Studio Code
+
+This repository contains a pre-configured `.vscode/launch.json` file. You can run the application directly from the VS Code editor:
+
+1. Open the **Run and Debug** view in VS Code (Ctrl + Shift + D).
+2. Select either **Launch Pulse-Check API** (regular launch) or **Nodemon Dev Mode** (hot-reloads code on changes) from the dropdown.
+3. Click the play button (or press `F5`) to launch the application.
+
 ---
+
 
 ## API Documentation
 

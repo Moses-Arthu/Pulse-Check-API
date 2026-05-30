@@ -55,7 +55,7 @@ class AlertService {
         await this.transporter.sendMail({
           from: config.email.from,
           to: alertEmail,
-          subject: `🚨 ALERT: Device ${id} is DOWN!`,
+          subject: `ALERT: Device ${id} is DOWN!`,
           text: [
             `Watchdog Sentinel detected a missed heartbeat.`,
             ``,
@@ -68,7 +68,7 @@ class AlertService {
             `— CritMon Watchdog Sentinel`,
           ].join('\n'),
           html: `
-            <h2 style="color:#e53e3e;">🚨 Device Down Alert</h2>
+            <h2 style="color:#e53e3e;">Device Down Alert</h2>
             <p><strong>Device ID:</strong> ${id}</p>
             <p><strong>Status:</strong> <span style="color:#e53e3e;">DOWN</span></p>
             <p><strong>Time:</strong> ${payload.time}</p>
